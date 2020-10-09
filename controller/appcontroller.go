@@ -500,8 +500,10 @@ func (ctrl *ApplicationController) requestAppRefresh(appName string, compareWith
 		}
 		if after != nil {
 			ctrl.appRefreshQueue.AddAfter(key, *after)
+			ctrl.appOperationQueue.AddAfter(key, *after)
 		} else {
 			ctrl.appRefreshQueue.Add(key)
+			ctrl.appOperationQueue.Add(key)
 		}
 	}
 }
@@ -1323,7 +1325,7 @@ func (ctrl *ApplicationController) autoSync(app *appv1.Application, syncStatus *
 
 	}
 
-	if app.Spec.SyncPolicy.Automated.Prune {
+	if app.Spec.SyncPolicy.Automated.Prune && !app.Spec.SyncPolicy.Automated.AllowEmpty {
 		bAllNeedPrune := true
 		for _, r := range resources {
 			if !r.RequiresPruning {
